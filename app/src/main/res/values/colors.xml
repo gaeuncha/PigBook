@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_primary">#2E9DE4</color>
+    <color name="color_primary_variant">#2E9DE4</color>
+    <color name="color_Secondary">#2E9DE4</color>
+    <color name="color_Secondary_variant">#03DAC5</color>
+
+    <!-- Text -->
+    <color name="sub_text_color">#777777</color>
+    <color name="selected_text_color">#2E9DE4</color>
+    <color name="hint_text_color">#999999</color>
+    <color name="blue_text_color">#304FFE</color>
+    <color name="red_text_color">#D93434</color>
+
+    <!-- Icon -->
+    <color name="blue_icon_color">#2E9DE4</color>
+
+    <!-- Button -->
+    <color name="default_button_color">#2E9DE4</color>
+    <color name="pressed_button_color">#1C5E89</color>
+    <color name="border_button_color">#FFFFFF</color>
+    <color name="border_pressed_button_color">#D6D6D6</color>
+
+    <!-- List -->
+    <color name="default_list_color">#FFFFFF</color>
+    <color name="pressed_list_color">#D6D6D6</color>
+
+    <!-- Line -->
+    <color name="default_line_color">#CCCCCC</color>
+
+    <!-- Border -->
+    <color name="default_border_color">#CCCCCC</color>
+
+    <!-- Background -->
+    <color name="info_background_color">#EEEEEE</color>
+
+    <!-- Transparency -->
+    <color name="popup_transparent">#66000000</color>
+</resources>

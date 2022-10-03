@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layBlock"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="56dp"
+    android:paddingEnd="56dp"
+    android:background="@color/popup_transparent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/layout_round_no_border">
+
+        <LinearLayout
+            android:id="@+id/layBody"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txtTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:text="@string/default_text"
+                />
+
+            <EditText
+                android:id="@+id/editCategory"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:textSize="15sp"
+                android:textColorHint="@color/hint_text_color"
+                android:inputType="text"
+                android:background="@drawable/edit_background"
+                />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnCancel"
+                    android:layout_width="0px"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="취소"
+                    style="@style/BorderButton"
+                    />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnOk"
+                    android:layout_width="0px"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="확인"
+                    style="@style/RectangleButton"
+                    />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
