@@ -8,6 +8,11 @@ public class Constants {
         public static final String CATEGORY = "categorys";      // 가계부 분류
     }
 
+    /* 액티비티에서 프레그먼트에 요청할 작업 종류 */
+    public static class FragmentTaskKind {
+        public static final int REFRESH = 0;                    // 새로고침
+    }
+
     /* 가계부 종류 (지출/수입) */
     public static class AccountBookKind {
         public static final int EXPENDITURE = 0;                // 지출

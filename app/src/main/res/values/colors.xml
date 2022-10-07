@@ -9,6 +9,7 @@
     <color name="sub_text_color">#777777</color>
     <color name="selected_text_color">#2E9DE4</color>
     <color name="hint_text_color">#999999</color>
+    <color name="disable_text_color">#BBBBBB</color>
     <color name="blue_text_color">#304FFE</color>
     <color name="red_text_color">#D93434</color>
 

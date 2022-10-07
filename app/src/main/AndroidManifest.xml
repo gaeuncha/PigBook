@@ -25,13 +25,15 @@
 
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".CategoryActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".AccountBookAddActivity"
+            android:screenOrientation="portrait" />
 
     </application>
 

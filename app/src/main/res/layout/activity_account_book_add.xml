@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AccountBookAddActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
+
+            <RadioGroup
+                android:id="@+id/rdgKind"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <RadioButton
+                    android:id="@+id/rdExpenditure"
+                    android:layout_width="0px"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="지출"
+                    style="@style/RadioButton"
+                    />
+
+                <RadioButton
+                    android:id="@+id/rdIncome"
+                    android:layout_width="0px"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="수입"
+                    style="@style/RadioButton"
+                    />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/txtDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:text="@string/default_text"
+                    />
+
+                <TextView
+                    android:id="@+id/txtWeek"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:text="@string/default_text"
+                    />
+
+                <TextView
+                    android:id="@+id/txtTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:text="@string/default_text"
+                    />
+
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/spAssetsKind"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="16dp"
+                android:spinnerMode="dropdown"
+                android:popupElevation="5dp"
+                android:background="@drawable/spinner_background"
+                />
+
+            <Spinner
+                android:id="@+id/spCategory"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="16dp"
+                android:spinnerMode="dropdown"
+                android:popupElevation="5dp"
+                android:background="@drawable/spinner_background"
+                />
+
+            <EditText
+                android:id="@+id/editMoney"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="16dp"
+                android:textSize="15sp"
+                android:textColorHint="@color/hint_text_color"
+                android:inputType="number"
+                android:background="@drawable/edit_background"
+                />
+
+            <EditText
+                android:id="@+id/editMemo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="top|start"
+                android:textSize="15sp"
+                android:textColorHint="@color/hint_text_color"
+                android:lines="10"
+                android:minLines="10"
+                android:maxLines="20"
+                android:inputType="textMultiLine|text"
+                android:scrollbars="vertical"
+                android:background="@drawable/edit_multi_background"
+                />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnOk"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="저장"
+        style="@style/RectangleButton"
+        />
+
+</LinearLayout>

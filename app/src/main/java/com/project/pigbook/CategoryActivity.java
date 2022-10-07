@@ -1,6 +1,5 @@
 package com.project.pigbook;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -18,19 +17,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.project.pigbook.adapter.CategoryAdapter;
 import com.project.pigbook.entity.Category;
 import com.project.pigbook.entity.CategoryItem;
 import com.project.pigbook.listener.OnItemClickListener;
-import com.project.pigbook.listener.OnPopupClickListener;
 import com.project.pigbook.popupwindow.CategoryPopup;
 import com.project.pigbook.util.Constants;
 import com.project.pigbook.util.GlobalVariable;
@@ -42,11 +37,11 @@ public class CategoryActivity extends AppCompatActivity {
     //private static final String TAG = CategoryActivity.class.getSimpleName();
     private static final String TAG = "PigBook";
 
+    private ProgressDialog progressDialog;      // 로딩 dialog
+
     private RecyclerView recyclerView;
     private CategoryAdapter adapter;
     private ArrayList<CategoryItem> items;
-
-    private ProgressDialog progressDialog;      // 로딩 dialog
 
     private TextView txtCount, txtNone;
 

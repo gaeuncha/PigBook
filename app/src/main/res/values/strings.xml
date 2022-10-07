@@ -7,12 +7,15 @@
     <!--    Title    -->
     <string name="title_category_1">분류(지출)</string>
     <string name="title_category_2">분류(수입)</string>
+    <string name="title_account_book_add">가계부 등록</string>
 
     <!--    Menu    -->
     <string name="menu_account_book">가계부</string>
     <string name="menu_regular_payment">정기결제</string>
     <string name="menu_analysis">분석</string>
     <string name="menu_setting">설정</string>
+    <string name="menu_message">문자</string>
+    <string name="menu_search">검색</string>
 
     <!--    Message    -->
     <string name="msg_back_press_end">\'뒤로\' 버튼을 한번 더 누르면 종료됩니다.</string>
@@ -39,4 +42,9 @@
 
     <!--    Permission    -->
     <string name="permission_rationale_app_use">앱을 이용하기 위해 권한이 필요합니다.</string>
+
+    <string-array name="assets_kind_list">
+        <item>현금</item>
+        <item>카드</item>
+    </string-array>
 </resources>
