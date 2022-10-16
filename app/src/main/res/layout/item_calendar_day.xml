@@ -56,7 +56,7 @@
                     android:id="@+id/txtIncome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/blue_text_color"
                     android:text="@string/default_text"
                     tools:ignore="SmallSp" />
@@ -65,7 +65,7 @@
                     android:id="@+id/txtExpenditure"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/red_text_color"
                     android:text="@string/default_text"
                     tools:ignore="SmallSp" />
@@ -74,7 +74,7 @@
                     android:id="@+id/txtBalance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:text="@string/default_text"
                     tools:ignore="SmallSp" />
 

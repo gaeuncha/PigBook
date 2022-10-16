@@ -6,6 +6,7 @@ public class Constants {
     public static class FirestoreCollectionName {
         public static final String USER = "users";              // 사용자(회원)
         public static final String CATEGORY = "categorys";      // 가계부 분류
+        public static final String ACCOUNT_BOOK = "accountBooks";   // 가계부
     }
 
     /* 액티비티에서 프레그먼트에 요청할 작업 종류 */
@@ -23,6 +24,13 @@ public class Constants {
     public static class AccountBookAssetsKind {
         public static final int CASH = 0;                       // 현금
         public static final int CARD = 1;                       // 카드
+    }
+
+    /* 가계부 검색 종류 */
+    public static class AccountBookSearchKind {
+        public static final int DAY = 0;                        // 일
+        public static final int WEEK = 1;                       // 주
+        public static final int DETAIL = 2;                     // 상세검색
     }
 
     /* 편집 모드 (등록/수정) */

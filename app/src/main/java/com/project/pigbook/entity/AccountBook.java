@@ -1,6 +1,12 @@
 package com.project.pigbook.entity;
 
-public class AccountBook {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+/*
+Parcelable 타입의 객체만 Intent 을 통해 Activity 간 데이터를 넘길 수 있음
+ */
+public class AccountBook implements Parcelable {
 
     private int kind;                               // 수입 / 지출
     private int assetsKind;                         // 자산종류 (현금 / 카드)
@@ -25,6 +31,10 @@ public class AccountBook {
         this.money = money;
         this.inputDate = inputDate;
         this.inputTime = inputTime;
+    }
+
+    public AccountBook(Parcel in) {
+        readFromParcel(in);
     }
 
     public int getKind() {
@@ -82,4 +92,38 @@ public class AccountBook {
     public void setInputTime(String inputTime) {
         this.inputTime = inputTime;
     }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.kind);
+        dest.writeInt(this.assetsKind);
+        dest.writeString(this.category);
+        dest.writeString(this.memo);
+        dest.writeLong(this.money);
+        dest.writeString(this.inputDate);
+        dest.writeString(this.inputTime);
+    }
+
+    private void readFromParcel(Parcel in){
+        this.kind = in.readInt();
+        this.assetsKind = in.readInt();
+        this.category = in.readString();
+        this.memo = in.readString();
+        this.money = in.readLong();
+        this.inputDate = in.readString();
+        this.inputTime = in.readString();
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public AccountBook createFromParcel(Parcel in) {
+            return new AccountBook(in);
+        }
+
+        public AccountBook[] newArray(int size) {
+            return new AccountBook[size];
+        }
+    };
 }

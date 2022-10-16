@@ -26,6 +26,7 @@ import com.project.pigbook.R;
 import com.project.pigbook.adapter.MyFragmentStateAdapter;
 import com.project.pigbook.fragment.abstracts.ITaskFragment;
 import com.project.pigbook.util.Constants;
+import com.project.pigbook.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -211,6 +212,13 @@ public class AccountBookFragment extends Fragment {
         }
 
         this.txtMonth.setText(DateFormat.format("yyyy.MM", this.calendar));
+    }
+
+    /* 총 금액 표시 (AccountBookViewFragment 에서 호출) */
+    public void displayTotalMoney(long income, long expenditure) {
+        this.txtIncome.setText(Utils.formatComma(income) + "원");
+        this.txtExpenditure.setText(Utils.formatComma(expenditure) + "원");
+        this.txtBalance.setText(Utils.formatComma(income - expenditure) + "원");
     }
 
     /* 가계부 등록 ActivityForResult */

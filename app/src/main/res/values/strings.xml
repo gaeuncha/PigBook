@@ -8,6 +8,7 @@
     <string name="title_category_1">분류(지출)</string>
     <string name="title_category_2">분류(수입)</string>
     <string name="title_account_book_add">가계부 등록</string>
+    <string name="title_account_book_edit">가계부 수정</string>
 
     <!--    Menu    -->
     <string name="menu_account_book">가계부</string>
@@ -26,6 +27,9 @@
     <string name="msg_user_join_confirm">회원가입 중입니다.</string>
     <string name="msg_category_check_empty">분류명을 입력하세요.</string>
     <string name="msg_category_check_overlap">동일한 분류가 존재합니다.</string>
+    <string name="msg_category_select_empty">분류를 선택하세요.</string>
+    <string name="msg_money_check_empty">금액을 입력하세요.</string>
+    <string name="msg_memo_check_empty">내용을 입력하세요.</string>
     <string name="msg_category_data_empty">등록된 분류가 없습니다.</string>
     <string name="msg_data_empty">검색결과 또는 내역이 없습니다.</string>
     <string name="msg_error">일시적인 장애가 발생했습니다.</string>
@@ -33,8 +37,10 @@
     <!--    Dialog    -->
     <string name="dialog_title_logout">로그아웃</string>
     <string name="dialog_title_category_delete">분류 삭제</string>
+    <string name="dialog_title_account_book_delete">가계부 삭제</string>
     <string name="dialog_msg_logout">로그아웃 하시겠습니까?</string>
     <string name="dialog_msg_category_delete">분류를 삭제하시겠습니까?</string>
+    <string name="dialog_msg_account_book_delete">가계부를 삭제하시겠습니까?</string>
     <string name="dialog_ok">확인</string>
     <string name="dialog_cancel">취소</string>
     <string name="dialog_allow">수락</string>

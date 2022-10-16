@@ -35,8 +35,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
 
-public class AccountBookAddActivity extends AppCompatActivity {
-    //private static final String TAG = AccountBookAddActivity.class.getSimpleName();
+public class AccountBookEditActivity extends AppCompatActivity {
+    //private static final String TAG = AccountBookEditActivity.class.getSimpleName();
     private static final String TAG = "PigBook";
 
     private ProgressDialog progressDialog;      // 로딩 dialog
@@ -50,18 +50,21 @@ public class AccountBookAddActivity extends AppCompatActivity {
     private InputMethodManager imm;             // 키보드를 숨기기 위해 필요함
 
     private int kind;                           // 지출 / 수입
-    private String defaultDate;                 // 등록일 기본값
+
+    private String accountBookDocId;            // 가계부 doc id
+    private AccountBook accountBook;            // 가계부 객체
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_book_form);
 
-        // 등록일
+        // 가계부 doc id, 객체
         Intent intent = getIntent();
-        this.defaultDate = intent.getStringExtra("date");
+        this.accountBookDocId = intent.getStringExtra("account_book_doc_id");
+        this.accountBook = intent.getParcelableExtra("account_book");
 
-        setTitle(R.string.title_account_book_add);
+        setTitle(R.string.title_account_book_edit);
 
         // 홈버튼(<-) 표시
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -87,15 +90,6 @@ public class AccountBookAddActivity extends AppCompatActivity {
         this.spAssetsKind = findViewById(R.id.spAssetsKind);
         this.spCategory = findViewById(R.id.spCategory);
 
-        // 현금/카드 구성
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item,
-                getResources().getStringArray(R.array.assets_kind_list));
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        this.spAssetsKind.setAdapter(adapter);
-
-        // 종류 기본값
-        this.kind = Constants.AccountBookKind.EXPENDITURE;
-        ((RadioButton) findViewById(R.id.rdExpenditure)).setChecked(true);
         ((RadioGroup) findViewById(R.id.rdgKind)).setOnCheckedChangeListener((group, checkedId) -> {
             // 선택
             switch (checkedId) {
@@ -110,7 +104,7 @@ public class AccountBookAddActivity extends AppCompatActivity {
             }
 
             // 분류 구성하기
-            createCategory(this.kind);
+            createCategory(this.kind, false);
         });
 
         findViewById(R.id.txtDate).setOnClickListener(view -> {
@@ -137,8 +131,8 @@ public class AccountBookAddActivity extends AppCompatActivity {
             }
         });
 
-        // 초기화
-        init();
+        // 가계부 정보
+        infoAccountBook();
     }
 
     @Override
@@ -161,26 +155,43 @@ public class AccountBookAddActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /* 초기화 */
-    private void init() {
-        this.calendar = Calendar.getInstance();
-
-        // 등록일이 있으면
-        if (!TextUtils.isEmpty(this.defaultDate)) {
-            String time = Utils.getDate("HH:mm", this.calendar.getTimeInMillis());
-            this.calendar = Utils.getCalendar("yyyy-MM-dd HH:mm", this.defaultDate + " " + time);
+    /* 가계부 정보 */
+    private void infoAccountBook() {
+        if (this.accountBook == null) {
+            return;
         }
 
-        this.txtDate.setText(Utils.getDate("yyyy-MM-dd", this.calendar.getTimeInMillis()));     // 현재일 표시
-        this.txtTime.setText(Utils.getDate("HH:mm", this.calendar.getTimeInMillis()));          // 현재시간 표시
-        this.txtWeek.setText(Utils.getDate("EE", this.calendar.getTimeInMillis()));             // 요일 표시
+        // 지출 / 수입
+        this.kind = this.accountBook.getKind();
+        if (this.kind == Constants.AccountBookKind.EXPENDITURE) {
+            ((RadioButton) findViewById(R.id.rdExpenditure)).setChecked(true);
+        } else {
+            ((RadioButton) findViewById(R.id.rdIncome)).setChecked(true);
+        }
+
+        // 등록일시
+        this.calendar = Utils.getCalendar("yyyy-MM-dd HH:mm", this.accountBook.getInputDate() +
+                " " + this.accountBook.getInputTime());
+        this.txtDate.setText(Utils.getDate("yyyy-MM-dd", this.calendar.getTimeInMillis()));
+        this.txtTime.setText(Utils.getDate("HH:mm", this.calendar.getTimeInMillis()));
+        this.txtWeek.setText(Utils.getDate("EE", this.calendar.getTimeInMillis()));
+
+        // 현금/카드 구성
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                getResources().getStringArray(R.array.assets_kind_list));
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        this.spAssetsKind.setAdapter(adapter);
+        this.spAssetsKind.setSelection(this.accountBook.getAssetsKind());
+
+        this.editMoney.setText(String.valueOf(this.accountBook.getMoney()));
+        this.editMemo.setText(this.accountBook.getMemo());
 
         // 분류 구성하기
-        createCategory(this.kind);
+        createCategory(this.accountBook.getKind(), true);
     }
 
     /* 분류 구성하기 */
-    private void createCategory(int kind) {
+    private void createCategory(int kind, final boolean first) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         // 분류 목록 (분류명으로 정렬)
@@ -194,12 +205,21 @@ public class AccountBookAddActivity extends AppCompatActivity {
             ArrayList<String> items = new ArrayList<>();
             items.add("분류");
 
+            int position = 0;
             if (task.isSuccessful()) {
                 if (task.getResult() != null) {
+
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Category category = document.toObject(Category.class);
                         // 분류 추가
                         items.add(category.getName());
+
+                        // 첫 구성이면
+                        if (first && position == 0) {
+                            if (this.accountBook.getCategory().equals(category.getName())) {
+                                position = items.size() - 1;
+                            }
+                        }
                     }
                 }
             }
@@ -209,6 +229,11 @@ public class AccountBookAddActivity extends AppCompatActivity {
             adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
             this.spCategory.setAdapter(adapter);
+
+            // 첫 구성이면
+            if (first) {
+                this.spCategory.setSelection(position);
+            }
         });
     }
 
@@ -279,25 +304,26 @@ public class AccountBookAddActivity extends AppCompatActivity {
         String time = this.txtTime.getText().toString();
 
         // 가계부 정보
-        final AccountBook accountBook = new AccountBook(this.kind, assetsKind, category,
+        final AccountBook accountBook0 = new AccountBook(this.kind, assetsKind, category,
                 memo, Long.parseLong(money), date, time);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // 가계부 등록
+        // 가계부 정보 수정 (set() 을 이용해서 덮어쓰기)
         db.collection(Constants.FirestoreCollectionName.USER)
                 .document(GlobalVariable.user.getUid())
                 .collection(Constants.FirestoreCollectionName.ACCOUNT_BOOK)
-                .add(accountBook)
-                .addOnSuccessListener(documentReference -> {
+                .document(this.accountBookDocId)
+                .set(accountBook0)
+                .addOnSuccessListener(aVoid -> {
                     // 성공
                     this.progressDialog.dismiss();
 
-                    // 등록한 내용을 달력에 적용하기 위함
+                    // 수정한 내용을 달력에 적용하기 위함
                     setResult(Activity.RESULT_OK);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    // 등록 실패
+                    // 실패
                     this.progressDialog.dismiss();
                     Toast.makeText(this, R.string.msg_error, Toast.LENGTH_SHORT).show();
                 });

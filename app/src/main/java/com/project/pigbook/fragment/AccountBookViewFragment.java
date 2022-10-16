@@ -1,15 +1,15 @@
 package com.project.pigbook.fragment;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,32 +17,41 @@ import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.project.pigbook.AccountBookAddActivity;
+import com.project.pigbook.AccountBookListActivity;
 import com.project.pigbook.R;
 import com.project.pigbook.adapter.CalendarAdapter;
+import com.project.pigbook.entity.AccountBook;
 import com.project.pigbook.entity.CalendarDay;
 import com.project.pigbook.fragment.abstracts.ITaskFragment;
 import com.project.pigbook.listener.OnItemClickListener;
 import com.project.pigbook.util.Constants;
+import com.project.pigbook.util.GlobalVariable;
 import com.project.pigbook.util.MarginDecoration;
+import com.project.pigbook.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class AccountBookViewFragment extends Fragment implements ITaskFragment {
     //private static final String TAG = AccountBookViewFragment.class.getSimpleName();
     private static final String TAG = "PigBook";
 
     private Context context;
-
-    private ProgressDialog progressDialog;          // 로딩 dialog
 
     private RecyclerView recyclerView;
     private CalendarAdapter adapter;
@@ -71,11 +80,6 @@ public class AccountBookViewFragment extends Fragment implements ITaskFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account_book_view, container, false);
 
-        // 로딩 dialog
-        this.progressDialog = new ProgressDialog(this.context);
-        this.progressDialog.setMessage("처리중...");
-        this.progressDialog.setCancelable(false);
-
         // 리사이클러뷰 설정
         this.recyclerView = view.findViewById(R.id.recyclerView);
         RecyclerView.LayoutManager lm = new GridLayoutManager(this.context, GRID_COL);
@@ -94,7 +98,7 @@ public class AccountBookViewFragment extends Fragment implements ITaskFragment {
             this.layWeeks[i].setOnClickListener(view1 -> {
                 // 주 선택
                 Log.d(TAG, "주선택:" + position);
-
+                selectWeek(position);
             });
         }
 
@@ -272,6 +276,23 @@ public class AccountBookViewFragment extends Fragment implements ITaskFragment {
             public void onItemClick(View view, int position) {
                 // 선택
 
+                // 일 클릭
+                String day = items.get(position).day;
+
+                if (TextUtils.isEmpty(day)) {
+                    return;
+                }
+
+                // 선택일자
+                String date = DateFormat.format("yyyy-MM", selectedCalendar) + "-" +
+                        String.format(Locale.getDefault(), "%02d", Integer.parseInt(day));
+                Log.d(TAG, "date:" + date);
+
+                // 가계부 내역
+                Intent intent = new Intent(context, AccountBookListActivity.class);
+                intent.putExtra("search_kind", Constants.AccountBookSearchKind.DAY);
+                intent.putExtra("search_date", date);
+                activityLauncher.launch(intent);
             }
 
             @Override
@@ -279,5 +300,128 @@ public class AccountBookViewFragment extends Fragment implements ITaskFragment {
             }
         }, this.items, this.layoutWidth, this.layoutHeight, this.displayDensity);
         this.recyclerView.setAdapter(this.adapter);
+
+        // 수입/지출 표시 (리스트 구성된 다음에 변경사항 적용됨)
+        setData(days, DateFormat.format("yyyy-MM", calendar).toString());
     }
+
+    /* 수입/지출 표시 */
+    private void setData(final ArrayList<CalendarDay> days, String month) {
+        // 기간
+        String date1 = month + "-01";
+        String date2 = month + "-31";
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // 한달동안 가계부 내역 얻기
+        Query query = db.collection(Constants.FirestoreCollectionName.USER)
+                .document(GlobalVariable.user.getUid())
+                .collection(Constants.FirestoreCollectionName.ACCOUNT_BOOK)
+                .whereGreaterThanOrEqualTo("inputDate", date1)
+                .whereLessThanOrEqualTo("inputDate", date2)
+                .orderBy("inputDate");
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult() != null) {
+                    long totalIncome = 0;
+                    long totalExpenditure = 0;
+
+                    // 달력의 시작 위치
+                    int pos = 0;
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        // 가계부 내역
+                        AccountBook accountBook = document.toObject(AccountBook.class);
+
+                        for (int i = pos; i < days.size(); i++) {
+                            if (!TextUtils.isEmpty(days.get(i).day)) {
+                                // 일자 값 구하기
+                                String day = accountBook.getInputDate().substring(8, 10);
+                                if (day.startsWith("0")) {
+                                    day = day.substring(1, 2);
+                                }
+
+                                // 달력의 해당 날자이면
+                                if (day.equals(days.get(i).day)) {
+                                    switch (accountBook.getKind()) {
+                                        case Constants.AccountBookKind.INCOME:
+                                            // 수입
+                                            days.get(i).income += accountBook.getMoney();
+                                            totalIncome += accountBook.getMoney();
+                                            break;
+                                        case Constants.AccountBookKind.EXPENDITURE:
+                                            // 지출
+                                            days.get(i).expenditure += accountBook.getMoney();
+                                            totalExpenditure += accountBook.getMoney();
+                                            break;
+                                    }
+                                    pos = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // 리스트에 적용
+                    this.adapter.notifyDataSetChanged();
+
+                    // 총 금액 표시
+                    ((AccountBookFragment) getParentFragment()).displayTotalMoney(totalIncome, totalExpenditure);
+                }
+            } else {
+                // 오류
+                Log.d(TAG, "error:" + task.getException().toString());
+                Toast.makeText(this.context, R.string.msg_error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /* 주 선택 */
+    private void selectWeek(int position) {
+        String week = this.txtValues[position].getText().toString();
+        if (!Utils.isNumeric(week)) {
+            return;
+        }
+
+        int w = Integer.parseInt(week);
+
+        // 월 마지막 주
+        int weekMax = this.selectedCalendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
+
+        String month = DateFormat.format("yyyy-MM", this.selectedCalendar).toString();
+        String date1, date2;
+        if (w == 1) {
+            // 1째주
+            date1 = month + "-01";
+            date2 = month + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(this.items.get(((position + 1) * GRID_COL) - 1).day));
+        } else if (w == weekMax) {
+            // 마지막주
+            date1 = month + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(this.items.get(position * GRID_COL).day));
+            // 월 최대일
+            int dayMax = this.selectedCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            date2 = month + "-" + String.format(Locale.getDefault(), "%02d", dayMax);
+        } else {
+            date1 = month + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(this.items.get(position * GRID_COL).day));
+            date2 = month + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(this.items.get(((position + 1) * GRID_COL) - 1).day));
+        }
+
+        // 가계부 내역 (주단위)
+        Intent intent = new Intent(this.context, AccountBookListActivity.class);
+        intent.putExtra("search_kind", Constants.AccountBookSearchKind.WEEK);
+        intent.putExtra("search_week", week);
+        intent.putExtra("search_date1", date1);
+        intent.putExtra("search_date2", date2);
+        this.activityLauncher.launch(intent);
+    }
+
+    /* 가계부 등록/수정 ActivityForResult */
+    private final ActivityResultLauncher<Intent> activityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // 가계부 등록 및 수정 후
+
+                    // 달력 페이지 만들기 (새로고침)
+                    createCalendar(this.selectedCalendar);
+                }
+            });
 }

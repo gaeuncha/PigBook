@@ -3,12 +3,25 @@ package com.project.pigbook.util;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
+
+    /* 숫자 체크 */
+    public static boolean isNumeric(String str) {
+        boolean chk = false;
+
+        try{
+            Double.parseDouble(str) ;
+            chk = true ;
+        } catch (Exception ignored) {}
+
+        return chk;
+    }
 
     /* 숫자 콤마 표시 */
     public static String formatComma(long value) {
@@ -22,6 +35,21 @@ public class Utils {
         Date date = new Date(timeMillis);
 
         return dateFormat.format(date);
+    }
+
+    /* Calendar 얻기 */
+    public static Calendar getCalendar(String format, String date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+
+        try {
+            Date d = dateFormat.parse(date);
+            if (d != null) {
+                calendar.setTime(d);
+            }
+        } catch (ParseException ignored) {}
+
+        return calendar;
     }
 
     /* GoogleSignInOptions 얻기 */
