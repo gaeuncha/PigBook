@@ -12,7 +12,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BigBook">
-
         <activity
             android:name=".IntroActivity"
             android:screenOrientation="portrait">
@@ -36,6 +35,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".AccountBookListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AccountBookSearchActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RegularPaymentAddActivity"
             android:screenOrientation="portrait" />
     </application>
 

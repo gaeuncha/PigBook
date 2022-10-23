@@ -22,8 +22,10 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.project.pigbook.AccountBookAddActivity;
+import com.project.pigbook.AccountBookSearchActivity;
 import com.project.pigbook.R;
 import com.project.pigbook.adapter.MyFragmentStateAdapter;
+import com.project.pigbook.fragment.abstracts.IFragment;
 import com.project.pigbook.fragment.abstracts.ITaskFragment;
 import com.project.pigbook.util.Constants;
 import com.project.pigbook.util.Utils;
@@ -31,7 +33,7 @@ import com.project.pigbook.util.Utils;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class AccountBookFragment extends Fragment {
+public class AccountBookFragment extends Fragment implements IFragment {
     //private static final String TAG = AccountBookFragment.class.getSimpleName();
     private static final String TAG = "PigBook";
 
@@ -177,11 +179,17 @@ public class AccountBookFragment extends Fragment {
                 return true;
             case R.id.menu_search:
                 // 검색
-
+                Intent intent = new Intent(this.context, AccountBookSearchActivity.class);
+                startActivity(intent);
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean isExecuted() {
+        return false;
     }
 
     /* 이전달 */

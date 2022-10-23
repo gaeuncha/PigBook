@@ -14,6 +14,7 @@ import com.project.pigbook.fragment.AccountBookFragment;
 import com.project.pigbook.fragment.AnalysisFragment;
 import com.project.pigbook.fragment.RegularPaymentFragment;
 import com.project.pigbook.fragment.SettingFragment;
+import com.project.pigbook.fragment.abstracts.IFragment;
 import com.project.pigbook.util.Constants;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("NonConstantResourceId")
     private final NavigationBarView.OnItemSelectedListener mItemSelectedListener = item -> {
+        // 실행중인지 체크
+        if (((IFragment) fragment).isExecuted()) {
+            return false;
+        }
 
         switch (item.getItemId()) {
             case R.id.menu_button_account_book:

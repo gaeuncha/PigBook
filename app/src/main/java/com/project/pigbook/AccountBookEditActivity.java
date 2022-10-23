@@ -239,7 +239,7 @@ public class AccountBookEditActivity extends AppCompatActivity {
 
     /* DatePickerDialog 호출 */
     private void showDatePicker() {
-        DatePickerDialog dialog = new DatePickerDialog(this, (DatePickerDialog.OnDateSetListener) (datePicker, year, monthOfYear, dayOfMonth) -> {
+        DatePickerDialog dialog = new DatePickerDialog(this, (datePicker, year, monthOfYear, dayOfMonth) -> {
             this.calendar.set(Calendar.YEAR, year);
             this.calendar.set(Calendar.MONTH, monthOfYear);
             this.calendar.set(Calendar.DATE, dayOfMonth);

@@ -3,7 +3,6 @@ package com.project.pigbook.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -13,8 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowMetrics;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.project.pigbook.AccountBookAddActivity;
 import com.project.pigbook.AccountBookListActivity;
 import com.project.pigbook.R;
 import com.project.pigbook.adapter.CalendarAdapter;
@@ -137,40 +133,30 @@ public class AccountBookViewFragment extends Fragment implements ITaskFragment {
 
                 // 달력 일 레이아웃 구하기
 
-                /* 해상도 */
-                int displayWidth, displayHeight;
                 // API 30 이상이면
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    WindowMetrics windowMetrics = ((Activity) this.context).getWindowManager().getCurrentWindowMetrics();
-                    Insets insets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
-
-                    Log.d(TAG, "insets:" + (insets.left + insets.right));
-
-                    displayWidth = windowMetrics.getBounds().width() - insets.left - insets.right;
-                    displayHeight = windowMetrics.getBounds().height() - insets.top - insets.bottom;
-
                     this.displayDensity = getResources().getDisplayMetrics().density;
                 } else {
                     DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-
-                    displayWidth = displayMetrics.widthPixels;
-                    displayHeight = displayMetrics.heightPixels;
-
                     this.displayDensity = displayMetrics.density;
                 }
 
-                Log.d(TAG, "w:" + displayWidth);
-                Log.d(TAG, "h:" + displayHeight);
+                Log.d(TAG, "w:" + this.recyclerView.getWidth());
+                Log.d(TAG, "h:" + this.recyclerView.getHeight());
 
                 Log.d(TAG, "d:" + this.displayDensity);
 
-                // (width) dp 사이즈 구하기 (주간항목이 32dp 잡혀 있어서 (해상도 - 32) 의 사이즈를 구해야됨
-                int space1 = Math.round(32 * this.displayDensity);
                 // (height) dp 사이즈 구하기 (가로라인 5개)
-                int space2 = Math.round((GRID_ROW - 1) * this.displayDensity);
+                int space = Math.round((GRID_ROW - 1) * this.displayDensity);
 
-                this.layoutWidth = (displayWidth - space1) / GRID_COL;
-                this.layoutHeight = (this.recyclerView.getHeight() - space2) / GRID_ROW;
+                Log.d(TAG, "space:" + space);
+
+                this.layoutWidth = Math.round(this.recyclerView.getWidth() / (float) GRID_COL);
+                this.layoutHeight = Math.round((this.recyclerView.getHeight() - space) / (float) GRID_ROW);
+
+                Log.d(TAG, "lw:" + this.layoutWidth);
+                Log.d(TAG, "lh:" + this.layoutHeight);
+
 
                 // 달력 페이지 생성
                 createCalendar(calendar);

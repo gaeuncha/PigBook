@@ -32,16 +32,27 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.project.pigbook.adapter.CategoryAdapter;
+import com.project.pigbook.entity.AccountBook;
+import com.project.pigbook.entity.Category;
+import com.project.pigbook.entity.CategoryItem;
+import com.project.pigbook.entity.RegularPayment;
 import com.project.pigbook.entity.User;
+import com.project.pigbook.listener.OnItemClickListener;
 import com.project.pigbook.util.Constants;
 import com.project.pigbook.util.GlobalVariable;
 import com.project.pigbook.util.Utils;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 
 public class IntroActivity extends AppCompatActivity {
     //private static final String TAG = IntroActivity.class.getSimpleName();
@@ -55,6 +66,10 @@ public class IntroActivity extends AppCompatActivity {
 
     private boolean executed;
     private boolean allowed;
+
+    private ArrayList<AccountBook> accountBooks;        // 정기결제로 가계부 등록할 정보
+    private HashMap<String, String> applyDates;         // 정기결제 적용일
+    private int applyCount;                             // 정기결제 적용 수 (가계부 등록수 + 적용일 변경수)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -267,8 +282,8 @@ public class IntroActivity extends AppCompatActivity {
                     if (user != null) {
                         GlobalVariable.user = user;
 
-                        // 메인으로 이동
-                        goMain();
+                        // 정기결제 내역이 있는지 확인
+                        checkRegularPayment();
                     } else {
                         // 회원가입 하기
                         join(fireUser);
@@ -330,6 +345,134 @@ public class IntroActivity extends AppCompatActivity {
                 onError(R.string.msg_error);
             }
         });
+    }
+
+    /* 정기결제 처리할 내역이 있는지 확인 */
+    private void checkRegularPayment() {
+        final String currentDate = Utils.getDate("yyyy-MM-dd", System.currentTimeMillis());  // 현재일
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // 정기결제 내역 (적용일이 현재일보다 이전인 내역 얻기)
+        Query query = db.collection(Constants.FirestoreCollectionName.USER)
+                .document(GlobalVariable.user.getUid())
+                .collection(Constants.FirestoreCollectionName.REGULAR_PAYMENT)
+                .whereLessThanOrEqualTo("applyDate", currentDate);
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult() != null) {
+                    this.accountBooks = new ArrayList<>();
+                    this.applyDates = new HashMap<>();
+                    this.applyCount = 0;
+
+                    // 정기결제 내역
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        // 정기결제 정보
+                        RegularPayment regularPayment = document.toObject(RegularPayment.class);
+                        // 적용일
+                        String applyDate = regularPayment.getApplyDate();
+                        while (true) {
+                            // 적용일이 현재일보다 이후이면
+                            if (currentDate.compareTo(applyDate) < 0) {
+                                this.applyDates.put(document.getId(), applyDate);
+                                break;
+                            } else {
+                                // 가계부 추가
+                                AccountBook accountBook = new AccountBook(Constants.AccountBookKind.EXPENDITURE,
+                                        regularPayment.getAssetsKind(), regularPayment.getCategory(),
+                                        regularPayment.getName(), regularPayment.getMoney(),
+                                        applyDate, Constants.REGULAR_PAYMENT_TIME);
+
+                                this.accountBooks.add(accountBook);
+
+                                // 적용일에 한달 추가
+                                Calendar calendar = Utils.getCalendar("yyyy-MM-dd", applyDate);
+                                calendar.add(Calendar.MONTH, 1);
+                                applyDate = Utils.getDate("yyyy-MM-dd", calendar.getTimeInMillis());
+                            }
+                        }
+                    }
+
+                    if (this.accountBooks.size() > 0) {
+                        // 가계부 등록
+                        for (AccountBook accountBook : this.accountBooks) {
+                            inputAccountBook(accountBook);
+                        }
+
+                        // 적용일 변경
+                        for (String key : this.applyDates.keySet()) {
+                            modifyApplyDate(key, this.applyDates.get(key));
+                        }
+                    } else {
+                        Log.d(TAG, "RegularPayment none");
+                        // 메인으로 이동
+                        goMain();
+                    }
+                }
+            } else {
+                // 오류
+                onError(R.string.msg_error);
+            }
+        });
+    }
+
+    /* 가계부 등록 */
+    private void inputAccountBook(final AccountBook accountBook) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // 가계부 등록
+        db.collection(Constants.FirestoreCollectionName.USER)
+                .document(GlobalVariable.user.getUid())
+                .collection(Constants.FirestoreCollectionName.ACCOUNT_BOOK)
+                .add(accountBook)
+                .addOnSuccessListener(documentReference -> {
+                    // 성공
+                    this.applyCount++;
+
+                    // 완료 체크
+                    checkCompletion();
+                })
+                .addOnFailureListener(e -> {
+                    // 등록 실패(무시)
+                    this.applyCount++;
+
+                    // 완료 체크
+                    checkCompletion();
+                });
+    }
+
+    /* 정기결제 적용일 수정 */
+    private void modifyApplyDate(String docId, final String applyDate) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // 정기결제 document 참조
+        DocumentReference reference = db.collection(Constants.FirestoreCollectionName.USER)
+                .document(GlobalVariable.user.getUid())
+                .collection(Constants.FirestoreCollectionName.REGULAR_PAYMENT)
+                .document(docId);
+        // 정기결제 적용일 수정
+        reference.update("applyDate", applyDate)
+                .addOnSuccessListener(aVoid -> {
+                    // 성공
+                    this.applyCount++;
+
+                    // 완료 체크
+                    checkCompletion();
+                })
+                .addOnFailureListener(e -> {
+                    // 실패 (무시)
+                    this.applyCount++;
+
+                    // 완료 체크
+                    checkCompletion();
+                });
+    }
+
+    /* 정기결제 적용 완료 체크 */
+    private void checkCompletion() {
+        // 완료이면
+        if (this.applyCount == (this.accountBooks.size() + this.applyDates.size())) {
+            // 메인으로 이동
+            goMain();
+        }
     }
 
     /* 오류 확인 */

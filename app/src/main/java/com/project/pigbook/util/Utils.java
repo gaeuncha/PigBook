@@ -1,5 +1,7 @@
 package com.project.pigbook.util;
 
+import android.text.TextUtils;
+
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.text.DecimalFormat;
@@ -21,6 +23,23 @@ public class Utils {
         } catch (Exception ignored) {}
 
         return chk;
+    }
+
+    /* 날자 유효성 체크 */
+    public static boolean isDate(String format, String date) {
+        if (TextUtils.isEmpty(date)) {
+            return false;
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.getDefault());
+        dateFormat.setLenient(false);
+
+        try {
+            dateFormat.parse(date);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 
     /* 숫자 콤마 표시 */

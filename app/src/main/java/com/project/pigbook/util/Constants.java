@@ -2,11 +2,14 @@ package com.project.pigbook.util;
 
 public class Constants {
 
+    public static final String REGULAR_PAYMENT_TIME = "09:00";  // 정기결제를 통해 등록될 때 적용할 시간
+
     /* Fire store Collection 이름 */
     public static class FirestoreCollectionName {
         public static final String USER = "users";              // 사용자(회원)
         public static final String CATEGORY = "categorys";      // 가계부 분류
-        public static final String ACCOUNT_BOOK = "accountBooks";   // 가계부
+        public static final String ACCOUNT_BOOK = "accountBooks";       // 가계부
+        public static final String REGULAR_PAYMENT = "regularPayments"; // 정기결제
     }
 
     /* 액티비티에서 프레그먼트에 요청할 작업 종류 */

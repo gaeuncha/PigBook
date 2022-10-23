@@ -20,11 +20,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.project.pigbook.CategoryActivity;
 import com.project.pigbook.IntroActivity;
 import com.project.pigbook.R;
+import com.project.pigbook.fragment.abstracts.IFragment;
 import com.project.pigbook.util.Constants;
 import com.project.pigbook.util.GlobalVariable;
 import com.project.pigbook.util.Utils;
 
-public class SettingFragment extends Fragment {
+public class SettingFragment extends Fragment implements IFragment {
     //private static final String TAG = SettingFragment.class.getSimpleName();
     private static final String TAG = "PigBook";
 
@@ -82,6 +83,11 @@ public class SettingFragment extends Fragment {
     public void onDetach() {
         this.context = null;
         super.onDetach();
+    }
+
+    @Override
+    public boolean isExecuted() {
+        return false;
     }
 
     /* 로그아웃 */

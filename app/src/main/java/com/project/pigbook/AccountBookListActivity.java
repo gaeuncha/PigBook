@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,6 +57,10 @@ public class AccountBookListActivity extends AppCompatActivity {
     private int searchKind;                     // 검색종류
     private String searchDate;                  // 검색일
     private String searchDate1, searchDate2;    // 시작일, 마지막일
+    private long searchMoney1, searchMoney2;    // 시작금액, 마지막금액
+    private String searchCategory;              // 검색카테고리
+
+    private int kind;                           // 지출 / 수입
 
     private int selectedPosition = -1;          // 분류 리스트 위치
 
@@ -90,7 +95,54 @@ public class AccountBookListActivity extends AppCompatActivity {
                 break;
             case Constants.AccountBookSearchKind.DETAIL:
                 // 상세 검색
+                this.kind = intent.getIntExtra("kind", Constants.AccountBookKind.EXPENDITURE);
+                this.searchCategory = intent.getStringExtra("search_category");
+                this.searchMoney1 = intent.getLongExtra("search_money1", 0);
+                this.searchMoney2 = intent.getLongExtra("search_money2", 0);
+                this.searchDate1 = intent.getStringExtra("search_date1");
+                this.searchDate2 = intent.getStringExtra("search_date2");
+                setTitle("상세검색");
 
+                String text;
+                if (this.kind == Constants.AccountBookKind.EXPENDITURE) {
+                    text = "지출";
+                } else {
+                    text = "수입";
+                }
+                if (!TextUtils.isEmpty(this.searchCategory)) {
+                    text += ", " + this.searchCategory;
+                }
+                if (this.searchMoney1 > 0 && this.searchMoney2 > 0) {
+                    // 시작금액이 마지막금액보다 크면
+                    if (this.searchMoney1 > this.searchMoney2) {
+                        long money = this.searchMoney1;
+                        this.searchMoney1 = this.searchMoney2;
+                        this.searchMoney2 = money;
+                    }
+                    text += ", 금액 " + this.searchMoney1 + " ~ " + this.searchMoney2;
+                } else if (this.searchMoney1 > 0) {
+                    text += ", 금액 " + this.searchMoney1 + " ~ ";
+                } else if (this.searchMoney2 > 0) {
+                    text += ", 금액 ~ " + this.searchMoney2;
+                }
+                if (Utils.isDate("yyyy-MM-dd", this.searchDate1) && Utils.isDate("yyyy-MM-dd", this.searchDate2)) {
+                    // 시작일이 마지막일보다 이후이면
+                    if (this.searchDate2.compareTo(this.searchDate1) < 0) {
+                        String date = this.searchDate1;
+                        this.searchDate1 = this.searchDate2;
+                        this.searchDate2 = date;
+                    }
+                    text += ", 기간 " + this.searchDate1 + " ~ " + this.searchDate2;
+                } else if (Utils.isDate("yyyy-MM-dd", this.searchDate1)) {
+                    text += ", 기간 " + this.searchDate1 + " ~ ";
+                } else if (Utils.isDate("yyyy-MM-dd", this.searchDate2)) {
+                    text += ", 기간 ~ " + this.searchDate2;
+                }
+
+                txtSearchRequirement.setText(text);
+
+                // 추가버튼 숨김
+                findViewById(R.id.fabAdd).setVisibility(View.GONE);
                 break;
         }
 
@@ -170,7 +222,33 @@ public class AccountBookListActivity extends AppCompatActivity {
                 break;
             case Constants.AccountBookSearchKind.DETAIL:
                 // 상세 검색
+                query = query.whereEqualTo("kind", this.kind);
 
+                // 분류
+                if (!TextUtils.isEmpty(this.searchCategory)) {
+                    query = query.whereEqualTo("category", this.searchCategory);
+                }
+
+                /* 금액 orderBy inputDate 하고 같이 사용할 수 없음
+                if (this.searchMoney1 > 0) {
+                    query = query.whereGreaterThanOrEqualTo("money", this.searchMoney1);
+                }
+                if (this.searchMoney2 > 0) {
+                    query = query.whereLessThanOrEqualTo("money", this.searchMoney2);
+                }
+                */
+
+                // 기간
+                if (Utils.isDate("yyyy-MM-dd", this.searchDate1)) {
+                    query = query.whereGreaterThanOrEqualTo("inputDate", this.searchDate1);
+                }
+                if (Utils.isDate("yyyy-MM-dd", this.searchDate2)) {
+                    query = query.whereLessThanOrEqualTo("inputDate", this.searchDate2);
+                }
+
+                // 정렬
+                query = query.orderBy("inputDate", Query.Direction.DESCENDING)
+                        .orderBy("inputTime", Query.Direction.DESCENDING);
                 break;
         }
 
@@ -186,17 +264,37 @@ public class AccountBookListActivity extends AppCompatActivity {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         // 가계부 정보
                         AccountBook accountBook = document.toObject(AccountBook.class);
-                        this.items.add(new AccountBookItem(document.getId(), accountBook));
 
-                        switch (accountBook.getKind()) {
-                            case Constants.AccountBookKind.INCOME:
-                                // 수입
-                                this.totalIncome += accountBook.getMoney();
-                                break;
-                            case Constants.AccountBookKind.EXPENDITURE:
-                                // 지출
-                                this.totalExpenditure += accountBook.getMoney();
-                                break;
+                        // 상세검색이면
+                        if (this.searchKind == Constants.AccountBookSearchKind.DETAIL) {
+                            // 금액 검색 (시작)
+                            if (this.searchMoney1 > 0) {
+                                if (accountBook.getMoney() < this.searchMoney1) {
+                                    accountBook = null;
+                                }
+                            }
+
+                            // 금액 검색 (끝)
+                            if (accountBook != null && this.searchMoney2 > 0) {
+                                if (accountBook.getMoney() > this.searchMoney2) {
+                                    accountBook = null;
+                                }
+                            }
+                        }
+
+                        if (accountBook != null) {
+                            this.items.add(new AccountBookItem(document.getId(), accountBook));
+
+                            switch (accountBook.getKind()) {
+                                case Constants.AccountBookKind.INCOME:
+                                    // 수입
+                                    this.totalIncome += accountBook.getMoney();
+                                    break;
+                                case Constants.AccountBookKind.EXPENDITURE:
+                                    // 지출
+                                    this.totalExpenditure += accountBook.getMoney();
+                                    break;
+                            }
                         }
                     }
 

@@ -10,8 +10,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.project.pigbook.R;
+import com.project.pigbook.fragment.abstracts.IFragment;
 
-public class AnalysisFragment extends Fragment {
+public class AnalysisFragment extends Fragment implements IFragment {
 
     @Nullable
     @Override
@@ -21,4 +22,8 @@ public class AnalysisFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public boolean isExecuted() {
+        return false;
+    }
 }

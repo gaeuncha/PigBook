@@ -75,11 +75,11 @@ public class AccountBookAdapter extends RecyclerView.Adapter<AccountBookAdapter.
         String dateTime = this.items.get(position).accountBook.getInputDate() + " " + this.items.get(position).accountBook.getInputTime();
         holder.txtDateTime.setText(dateTime);
 
+        holder.txtMemo.setText(this.items.get(position).accountBook.getMemo()); // 내용
+
         // 분류
         String category = "[" + this.items.get(position).accountBook.getCategory() + "]";
         holder.txtCategory.setText(category);
-
-        holder.txtMemo.setText(this.items.get(position).accountBook.getMemo()); // 내용
 
         // 지출/수입
         if (this.items.get(position).accountBook.getKind() == Constants.AccountBookKind.EXPENDITURE) {
@@ -108,8 +108,6 @@ public class AccountBookAdapter extends RecyclerView.Adapter<AccountBookAdapter.
     public int getItemCount() {
         return this.items.size();
     }
-
-
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         TextView txtDateTime, txtMemo, txtCategory, txtKind, txtAssetsKind, txtMoney;
