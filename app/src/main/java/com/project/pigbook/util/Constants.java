@@ -3,6 +3,7 @@ package com.project.pigbook.util;
 public class Constants {
 
     public static final String REGULAR_PAYMENT_TIME = "09:00";  // 정기결제를 통해 등록될 때 적용할 시간
+    public static final int MESSAGE_SEARCH_MONTH = 2;           // 문자 메시지 검색 월
 
     /* Fire store Collection 이름 */
     public static class FirestoreCollectionName {
@@ -34,6 +35,14 @@ public class Constants {
         public static final int DAY = 0;                        // 일
         public static final int WEEK = 1;                       // 주
         public static final int DETAIL = 2;                     // 상세검색
+    }
+
+    /* 문자 메시지 감지 타입 */
+    public static class MessageDetectionType {
+        public static final String NONE = "none";               // 감지 안함
+        public static final String DATE = "date";               // 일시
+        public static final String MONEY = "money";             // 금액
+        public static final String MEMO = "memo";               // 내용
     }
 
     /* 편집 모드 (등록/수정) */

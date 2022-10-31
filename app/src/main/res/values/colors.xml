@@ -37,4 +37,17 @@
 
     <!-- Transparency -->
     <color name="popup_transparent">#66000000</color>
+
+    <!-- Expenditure Color -->
+    <color name="expenditure_color_1">#990808</color>
+    <color name="expenditure_color_2">#C03131</color>
+    <color name="expenditure_color_3">#E35555</color>
+    <color name="expenditure_color_4">#D8ABAB</color>
+
+    <!-- Income Color -->
+    <color name="income_color_1">#0026FF</color>
+    <color name="income_color_2">#647BFF</color>
+    <color name="income_color_3">#9DACFF</color>
+    <color name="income_color_4">#CED5FF</color>
+
 </resources>

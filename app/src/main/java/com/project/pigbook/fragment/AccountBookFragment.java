@@ -23,6 +23,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.project.pigbook.AccountBookAddActivity;
 import com.project.pigbook.AccountBookSearchActivity;
+import com.project.pigbook.MessageListActivity;
 import com.project.pigbook.R;
 import com.project.pigbook.adapter.MyFragmentStateAdapter;
 import com.project.pigbook.fragment.abstracts.IFragment;
@@ -172,14 +173,16 @@ public class AccountBookFragment extends Fragment implements IFragment {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.menu_message:
                 // 문자 메시지 확인
-
+                intent = new Intent(this.context, MessageListActivity.class);
+                this.activityLauncher.launch(intent);
                 return true;
             case R.id.menu_search:
                 // 검색
-                Intent intent = new Intent(this.context, AccountBookSearchActivity.class);
+                intent = new Intent(this.context, AccountBookSearchActivity.class);
                 startActivity(intent);
                 return true;
         }
@@ -194,31 +197,13 @@ public class AccountBookFragment extends Fragment implements IFragment {
 
     /* 이전달 */
     private void prevMonth() {
-        int month = this.calendar.get(Calendar.MONTH);
-        int min = this.calendar.getActualMinimum(Calendar.MONTH);
-
-        // 1월이면
-        if (month == min) {
-            this.calendar.set(this.calendar.get(Calendar.YEAR) - 1, this.calendar.getActualMaximum(Calendar.MONTH), 1);
-        } else {
-            this.calendar.set(Calendar.MONTH, month - 1);
-        }
-
+        this.calendar.add(Calendar.MONTH, -1);
         this.txtMonth.setText(DateFormat.format("yyyy.MM", this.calendar));
     }
 
     /* 다음달 */
     private void nextMonth() {
-        int month = this.calendar.get(Calendar.MONTH);
-        int max = this.calendar.getActualMaximum(Calendar.MONTH);
-
-        // 12월이면
-        if (month == max) {
-            this.calendar.set(this.calendar.get(Calendar.YEAR) + 1, this.calendar.getActualMinimum(Calendar.MONTH), 1);
-        } else {
-            this.calendar.set(Calendar.MONTH, month + 1);
-        }
-
+        this.calendar.add(Calendar.MONTH, 1);
         this.txtMonth.setText(DateFormat.format("yyyy.MM", this.calendar));
     }
 
